@@ -27,16 +27,16 @@ abstract class AbstractStream
     protected $dlxMode = false;
 
     /**
-     * @var int
-     */
-    private $consumptionMode = self::PUBLISHER_MODE;
-
-    /**
-     * Don’t open a channel each publishing time
+     * Don’t open a channel each publishing time.
      *
      * @var Channel
      */
     protected $channel;
+
+    /**
+     * @var int
+     */
+    private $consumptionMode = self::PUBLISHER_MODE;
 
     /**
      * @var Connection
@@ -45,35 +45,25 @@ abstract class AbstractStream
 
     /**
      * AbstractStream constructor.
-     *
-     * @param Connection $connection
      */
     public function __construct(Connection $connection)
     {
         $this->connection = $connection;
     }
 
-    /**
-     * @return bool
-     */
     public function getDlxMode(): bool
     {
         return $this->dlxMode;
     }
 
     /**
-     * Sets stream consumption mode (It is used by publisher or consumer)
-     *
-     * @param int $mode
+     * Sets stream consumption mode (It is used by publisher or consumer).
      */
     public function setConsumptionMode(int $mode): void
     {
         $this->consumptionMode = $mode;
     }
 
-    /**
-     * @return int
-     */
     public function getConsumptionMode(): int
     {
         return $this->consumptionMode;
@@ -81,12 +71,10 @@ abstract class AbstractStream
 
     /**
      * @throws EventBusException
-     *
-     * @return Channel
      */
     public function getChannel(): Channel
     {
-        if ($this->channel !== null) {
+        if (null !== $this->channel) {
             return $this->channel;
         }
 
@@ -103,15 +91,11 @@ abstract class AbstractStream
         return $this->channel;
     }
 
-    /**
-     * @param array $data
-     * @param array $params
-     */
     public function publish(array $data, array $params = []): void
     {
         $default = [
             'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT,
-            'content_type' => 'application/json'
+            'content_type' => 'application/json',
         ];
 
         $params = array_merge($default, $params);
@@ -120,9 +104,6 @@ abstract class AbstractStream
         $this->getChannel()->publish($message, $this->getActualExchange());
     }
 
-    /**
-     * @return Exchange
-     */
     abstract public function getExchange(): Exchange;
 
     /**
@@ -131,11 +112,9 @@ abstract class AbstractStream
     abstract public function getQueue(): ?Queue;
 
     /**
-     * Returns "dead" messages Exchange
+     * Returns "dead" messages Exchange.
      *
      * @throws EventBusException
-     *
-     * @return Exchange
      */
     public function getExchangeDlx(): Exchange
     {
@@ -143,11 +122,9 @@ abstract class AbstractStream
     }
 
     /**
-     * Returns Queue with x-dead-letter-exchange and message-ttl setup
+     * Returns Queue with x-dead-letter-exchange and message-ttl setup.
      *
      * @throws EventBusException
-     *
-     * @return Queue
      */
     public function getQueueDlx(): Queue
     {
@@ -155,16 +132,14 @@ abstract class AbstractStream
     }
 
     /**
-     * Returns actual Exchange according to the mode
+     * Returns actual Exchange according to the mode.
      *
      * @throws EventBusException
-     *
-     * @return Exchange
      */
     private function getActualExchange(): Exchange
     {
         if ($this->getDlxMode()) {
-            $exchange = $this->getConsumptionMode() === self::PUBLISHER_MODE ?
+            $exchange = self::PUBLISHER_MODE === $this->getConsumptionMode() ?
                 $this->getExchangeDlx() : $this->getExchange();
         } else {
             $exchange = $this->getExchange();
@@ -174,16 +149,14 @@ abstract class AbstractStream
     }
 
     /**
-     * Returns actual Queue according to the mode
+     * Returns actual Queue according to the mode.
      *
      * @throws EventBusException
-     *
-     * @return null|Queue
      */
     private function getActualQueue(): ?Queue
     {
         if ($this->getDlxMode()) {
-            $queue = $this->getConsumptionMode() === self::PUBLISHER_MODE ?
+            $queue = self::PUBLISHER_MODE === $this->getConsumptionMode() ?
                 $this->getQueueDlx() : $this->getQueue();
         } else {
             $queue = $this->getQueue();
