@@ -1,6 +1,7 @@
 {
     "name": "kmtt/eventbus-sdk",
     "version": "0.1.0",
+    "type": "library",
     "autoload": {
         "psr-4": {
             "Kmtt\\EventBusSdk\\": "src/"
